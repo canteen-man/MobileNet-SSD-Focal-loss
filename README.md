@@ -19,4 +19,12 @@ The proto,src and include files have already changed.
 
 A pre training model is provided here，the voc 07 +12  _iter_20000 caffemodel.
 
+If you want to use openblas, you can git clone https://github.com/xianyi/OpenBLAS.git
+
+cd OpenBLAS
+
+make -j7
+
+make install
+
 Of course, you need to change some files，such as Makefile.config。
