@@ -15,7 +15,7 @@ The proto,src and include files have already changed.
 
 3. cd MobileNet-SSD-Focal-loss
 
-4../jobs/mobilenet+ssd+focal-loss-300*300.sh
+4. ./jobs/mobilenet+ssd+focal-loss-300*300.sh
 
 A pre training model is provided here，the voc 07 +12  _iter_20000 caffemodel.
 
