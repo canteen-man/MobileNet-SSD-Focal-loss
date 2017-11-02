@@ -19,4 +19,4 @@ The proto,src and include files have already changed.
 
 A pre training model is provided here，the voc 07 +12  _iter_20000 caffemodel.
 
-Of course, you need to change some files，such as makefile。
+Of course, you need to change some files，such as Makefile.config。
