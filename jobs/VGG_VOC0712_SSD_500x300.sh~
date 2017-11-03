@@ -1,6 +1,0 @@
-cd /home/wu/caffe-ssd
-./build/tools/caffe train \
---solver="jobs/solver.prototxt" \
---gpu 0 2>&1 | tee jobs/mobilenet+ssd+focal_loss.log \
---weights jobs/MobileNet_deploy.caffemodel
-#--snapshot=train/_iter_10000.solverstate \
