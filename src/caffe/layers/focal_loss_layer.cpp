@@ -10,7 +10,7 @@ namespace caffe {
 template <typename Dtype>
 void FocalLossLayer<Dtype>::LayerSetUp(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
-  LossLayer<Dtype>::LayerSetUp(bottom, top);
+  LossLayer<Dtype>::LayerSetUp(bottom, top);//创建时动态修改本层的laterparemeter参数适应softmaxlayer，当前的参数添加非0权重
   LayerParameter softmax_param(this->layer_param_);
   softmax_param.set_type("Softmax");
   softmax_layer_ = LayerRegistry<Dtype>::CreateLayer(softmax_param);
