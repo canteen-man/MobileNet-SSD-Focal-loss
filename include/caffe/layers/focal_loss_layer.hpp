@@ -52,7 +52,7 @@ class FocalLossLayer : public LossLayer<Dtype> {
     *    present; otherwise the loss is simply summed over spatial locations.
     */
   explicit FocalLossLayer(const LayerParameter& param)
-      : LossLayer<Dtype>(param) {}
+      : LossLayer<Dtype>(param) {}//从losslayer继承
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
