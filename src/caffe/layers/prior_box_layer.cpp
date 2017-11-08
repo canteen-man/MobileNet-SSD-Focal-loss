@@ -12,13 +12,13 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   const PriorBoxParameter& prior_box_param =
       this->layer_param_.prior_box_param();
-  CHECK_GT(prior_box_param.min_size_size(), 0) << "must provide min_size.";
+  CHECK_GT(prior_box_param.min_size_size(), 0) << "must provide min_size.";//检查默认框的最小数量必须大于0
   for (int i = 0; i < prior_box_param.min_size_size(); ++i) {
     min_sizes_.push_back(prior_box_param.min_size(i));
-    CHECK_GT(min_sizes_.back(), 0) << "min_size must be positive.";
+    CHECK_GT(min_sizes_.back(), 0) << "min_size must be positive.";//检查默认框的最小尺寸必须大于0
   }
   aspect_ratios_.clear();
-  aspect_ratios_.push_back(1.);
+  aspect_ratios_.push_back(1.);//肯定有一个1
   flip_ = prior_box_param.flip();
   for (int i = 0; i < prior_box_param.aspect_ratio_size(); ++i) {
     float ar = prior_box_param.aspect_ratio(i);
@@ -35,21 +35,21 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
         aspect_ratios_.push_back(1./ar);
       }
     }
-  }
-  num_priors_ = aspect_ratios_.size() * min_sizes_.size();
-  if (prior_box_param.max_size_size() > 0) {
-    CHECK_EQ(prior_box_param.min_size_size(), prior_box_param.max_size_size());
+  }//把不重复的加入长宽比向量，1/a和a
+  num_priors_ = aspect_ratios_.size() * min_sizes_.size();//总个数是minsize个数*比例个数
+  if (prior_box_param.max_size_size() > 0) {//如果有max size
+    CHECK_EQ(prior_box_param.min_size_size(), prior_box_param.max_size_size());//min size和max size个数必须一样多
     for (int i = 0; i < prior_box_param.max_size_size(); ++i) {
       max_sizes_.push_back(prior_box_param.max_size(i));
       CHECK_GT(max_sizes_[i], min_sizes_[i])
           << "max_size must be greater than min_size.";
       num_priors_ += 1;
     }
-  }
+  }//存max size，max size的数要大于min size
   clip_ = prior_box_param.clip();
   if (prior_box_param.variance_size() > 1) {
     // Must and only provide 4 variance.
-    CHECK_EQ(prior_box_param.variance_size(), 4);
+    CHECK_EQ(prior_box_param.variance_size(), 4);//必须4个值
     for (int i = 0; i < prior_box_param.variance_size(); ++i) {
       CHECK_GT(prior_box_param.variance(i), 0);
       variance_.push_back(prior_box_param.variance(i));
@@ -77,7 +77,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   } else {
     img_h_ = 0;
     img_w_ = 0;
-  }
+  }//一系列核对，没有img_h，默认为0
 
   if (prior_box_param.has_step_h() || prior_box_param.has_step_w()) {
     CHECK(!prior_box_param.has_step())
@@ -97,7 +97,7 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   }
 
   offset_ = prior_box_param.offset();
-}
+}//步长核对
 
 template <typename Dtype>
 void PriorBoxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -114,7 +114,7 @@ void PriorBoxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   top_shape[2] = layer_width * layer_height * num_priors_ * 4;
   CHECK_GT(top_shape[2], 0);
   top[0]->Reshape(top_shape);
-}
+}//reshape，确定top输出的大小
 
 template <typename Dtype>
 void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -124,7 +124,7 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   int img_width, img_height;
   if (img_h_ == 0 || img_w_ == 0) {
     img_width = bottom[1]->width();
-    img_height = bottom[1]->height();
+    img_height = bottom[1]->height();//没有img_h，就是输入特征图大小
   } else {
     img_width = img_w_;
     img_height = img_h_;
@@ -132,7 +132,7 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   float step_w, step_h;
   if (step_w_ == 0 || step_h_ == 0) {
     step_w = static_cast<float>(img_width) / layer_width;
-    step_h = static_cast<float>(img_height) / layer_height;
+    step_h = static_cast<float>(img_height) / layer_height;//特征图与原图之间的缩放系数
   } else {
     step_w = step_w_;
     step_h = step_h_;
@@ -143,9 +143,9 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   for (int h = 0; h < layer_height; ++h) {
     for (int w = 0; w < layer_width; ++w) {
       float center_x = (w + offset_) * step_w;
-      float center_y = (h + offset_) * step_h;
+      float center_y = (h + offset_) * step_h;//将特征图上的点映射回原图
       float box_width, box_height;
-      for (int s = 0; s < min_sizes_.size(); ++s) {
+      for (int s = 0; s < min_sizes_.size(); ++s) {//比例是1的能取到两个框，第一个框就是最小size
         int min_size_ = min_sizes_[s];
         // first prior: aspect_ratio = 1, size = min_size
         box_width = box_height = min_size_;
@@ -160,7 +160,7 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 
         if (max_sizes_.size() > 0) {
           CHECK_EQ(min_sizes_.size(), max_sizes_.size());
-          int max_size_ = max_sizes_[s];
+          int max_size_ = max_sizes_[s];//第二个比例是1的框是最小size*最大size开根号
           // second prior: aspect_ratio = 1, size = sqrt(min_size * max_size)
           box_width = box_height = sqrt(min_size_ * max_size_);
           // xmin
@@ -192,15 +192,15 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         }
       }
     }
-  }
+  }//得到每个框的左上和右下坐标，除以特征图的宽和高，做归一化
   // clip the prior's coordidate such that it is within [0, 1]
   if (clip_) {
     for (int d = 0; d < dim; ++d) {
       top_data[d] = std::min<Dtype>(std::max<Dtype>(top_data[d], 0.), 1.);
     }
-  }
+  }//确保所有坐标缩放至0到1，小于0和大于1的用0和1代替
   // set the variance.
-  top_data += top[0]->offset(0, 1);
+  top_data += top[0]->offset(0, 1);//top data存一个新地址
   if (variance_.size() == 1) {
     caffe_set<Dtype>(dim, Dtype(variance_[0]), top_data);
   } else {
@@ -216,7 +216,7 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       }
     }
   }
-}
+}//存variance，对误差进行放大
 
 INSTANTIATE_CLASS(PriorBoxLayer);
 REGISTER_LAYER_CLASS(PriorBox);
