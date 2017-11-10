@@ -102,7 +102,7 @@ void ImageDataLayer<Dtype>::ShuffleImages() {
 
 // This function is called on prefetch thread
 template <typename Dtype>
-void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {//图像存进内存
+void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {//图像存进内存，每次迭代都会载入loadbatch batch由data和label组成
   CPUTimer batch_timer;
   batch_timer.Start();
   double read_time = 0;
@@ -123,14 +123,14 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {//图像存进内�
       new_height, new_width, is_color);
   CHECK(cv_img.data) << "Could not load " << lines_[lines_id_].first;
   // Use data_transformer to infer the expected blob shape from a cv_img.
-  vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_img);
+  vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_img);//把opencv的mat转为blob
   this->transformed_data_.Reshape(top_shape);
   // Reshape batch according to the batch_size.
   top_shape[0] = batch_size;
   batch->data_.Reshape(top_shape);//先把batch的空间大小定义好
 
-  Dtype* prefetch_data = batch->data_.mutable_cpu_data();//指向data第一个数据的位置
-  Dtype* prefetch_label = batch->label_.mutable_cpu_data();//指向label第一个数据的位置
+  Dtype* prefetch_data = batch->data_.mutable_cpu_data();//
+  Dtype* prefetch_label = batch->label_.mutable_cpu_data();//存data和label
 
   // datum scales
   const int lines_size = lines_.size();
@@ -145,7 +145,7 @@ void ImageDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {//图像存进内�
     timer.Start();
     // Apply transformations (mirror, crop...) to the image
     int offset = batch->data_.offset(item_id);
-    this->transformed_data_.set_cpu_data(prefetch_data + offset);//指向内存中的首地址
+    this->transformed_data_.set_cpu_data(prefetch_data + offset);//指向内存中的首地址transform可以转换多种格式
     this->data_transformer_->Transform(cv_img, &(this->transformed_data_));//向内存中存储
     trans_time += timer.MicroSeconds();
 
