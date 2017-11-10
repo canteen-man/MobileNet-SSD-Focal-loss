@@ -175,7 +175,7 @@ caffe::SolverAction::Enum GetRequestedAction(
   }
   LOG(FATAL) << "Invalid signal effect \""<< flag_value << "\" was specified";
 }
-
+//入口文件
 // Train / Finetune a model.
 int train() {
   CHECK_GT(FLAGS_solver.size(), 0) << "Need a solver definition to train.";
@@ -184,8 +184,8 @@ int train() {
       "but not both.";
   vector<string> stages = get_stages_from_flags();
 
-  caffe::SolverParameter solver_param;
-  caffe::ReadSolverParamsFromTextFileOrDie(FLAGS_solver, &solver_param);
+  caffe::SolverParameter solver_param;//定义一个参数类
+  caffe::ReadSolverParamsFromTextFileOrDie(FLAGS_solver, &solver_param);//文件里的参数读到变量里
 
   solver_param.mutable_train_state()->set_level(FLAGS_level);
   for (int i = 0; i < stages.size(); i++) {
