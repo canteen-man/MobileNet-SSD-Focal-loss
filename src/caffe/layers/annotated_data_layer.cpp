@@ -15,24 +15,24 @@
 namespace caffe {
 
 template <typename Dtype>
-AnnotatedDataLayer<Dtype>::AnnotatedDataLayer(const LayerParameter& param)
+AnnotatedDataLayer<Dtype>::AnnotatedDataLayer(const LayerParameter& param)//构造函数
   : BasePrefetchingDataLayer<Dtype>(param),
     reader_(param) {
 }
 
 template <typename Dtype>
-AnnotatedDataLayer<Dtype>::~AnnotatedDataLayer() {
+AnnotatedDataLayer<Dtype>::~AnnotatedDataLayer() {//析构函数
   this->StopInternalThread();
 }
 
 template <typename Dtype>
 void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
-  const int batch_size = this->layer_param_.data_param().batch_size();
+  const int batch_size = this->layer_param_.data_param().batch_size();//设置batch size
   const AnnotatedDataParameter& anno_data_param =
-      this->layer_param_.annotated_data_param();
+      this->layer_param_.annotated_data_param();//增加数据的设置
   for (int i = 0; i < anno_data_param.batch_sampler_size(); ++i) {
-    batch_samplers_.push_back(anno_data_param.batch_sampler(i));
+    batch_samplers_.push_back(anno_data_param.batch_sampler(i));//依次使用每一张增广数据的方式，存入bathc sampler
   }
   label_map_file_ = anno_data_param.label_map_file();
   // Make sure dimension is consistent within batch.
@@ -51,10 +51,10 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
 
   // Use data_transformer to infer the expected blob shape from anno_datum.
   vector<int> top_shape =
-      this->data_transformer_->InferBlobShape(anno_datum.datum());
+      this->data_transformer_->InferBlobShape(anno_datum.datum());//根据transform_param确定top shape
   this->transformed_data_.Reshape(top_shape);
   // Reshape top[0] and prefetch_data according to the batch_size.
-  top_shape[0] = batch_size;
+  top_shape[0] = batch_size;//reshape中 第一位是batch
   top[0]->Reshape(top_shape);
   for (int i = 0; i < this->PREFETCH_COUNT; ++i) {
     this->prefetch_[i].data_.Reshape(top_shape);
@@ -65,7 +65,7 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
   // label
   if (this->output_labels_) {
     has_anno_type_ = anno_datum.has_type() || anno_data_param.has_anno_type();
-    vector<int> label_shape(4, 1);
+    vector<int> label_shape(4, 1);//初始化label的维度
     if (has_anno_type_) {
       anno_type_ = anno_datum.type();
       if (anno_data_param.has_anno_type()) {
