@@ -4,7 +4,7 @@
 
 #include "caffe/layers/softmax_loss_layer.hpp"
 #include "caffe/util/math_functions.hpp"
-
+//softmax前向时用。softmax loss训练时用
 namespace caffe {
 
 template <typename Dtype>
@@ -74,7 +74,7 @@ void SoftmaxWithLossLayer<Dtype>::Forward_cpu(
       DCHECK_GE(label_value, 0);
       DCHECK_LT(label_value, prob_.shape(softmax_axis_));
       loss -= log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
-                           Dtype(FLT_MIN)));
+                           Dtype(FLT_MIN)));//计算公式
       ++count;
     }
   }
