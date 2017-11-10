@@ -213,12 +213,12 @@ void Solver<Dtype>::Step(int iters) {
   losses_.clear();
   smoothed_loss_ = 0;
 
-  while (iter_ < stop_iter) {
+  while (iter_ < stop_iter) {//总迭代
     // zero-init the params
     net_->ClearParamDiffs();
     if (param_.test_interval() && iter_ % param_.test_interval() == 0
         && (iter_ > 0 || param_.test_initialization())
-        && Caffe::root_solver()) {
+        && Caffe::root_solver()) {//每隔设定次数进行一次测试
       TestAll();
       if (requested_early_exit_) {
         // Break out of the while loop because stop was requested while testing.
@@ -265,7 +265,7 @@ void Solver<Dtype>::Step(int iters) {
     for (int i = 0; i < callbacks_.size(); ++i) {
       callbacks_[i]->on_gradients_ready();
     }
-    ApplyUpdate();
+    ApplyUpdate();//更新权值
 
     // Increment the internal iter_ counter -- its value should always indicate
     // the number of times the weights have been updated.
