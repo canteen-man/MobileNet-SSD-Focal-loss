@@ -16,7 +16,7 @@ void SoftmaxLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   sum_multiplier_.Reshape(mult_dims);
   Dtype* multiplier_data = sum_multiplier_.mutable_cpu_data();
   caffe_set(sum_multiplier_.count(), Dtype(1), multiplier_data);
-  outer_num_ = bottom[0]->count(0, softmax_axis_);
+  outer_num_ = bottom[0]->count(0, softmax_axis_);//指一个n，batch size
   inner_num_ = bottom[0]->count(softmax_axis_ + 1);
   vector<int> scale_dims = bottom[0]->shape();
   scale_dims[softmax_axis_] = 1;
@@ -34,18 +34,18 @@ void SoftmaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   caffe_copy(bottom[0]->count(), bottom_data, top_data);
   // We need to subtract the max to avoid numerical issues, compute the exp,
   // and then normalize.
-  for (int i = 0; i < outer_num_; ++i) {
+  for (int i = 0; i < outer_num_; ++i) {//实现求指数的总和，然后求占比
     // initialize scale_data to the first plane
     caffe_copy(inner_num_, bottom_data + i * dim, scale_data);
     for (int j = 0; j < channels; j++) {
       for (int k = 0; k < inner_num_; k++) {
         scale_data[k] = std::max(scale_data[k],
-            bottom_data[i * dim + j * inner_num_ + k]);
+            bottom_data[i * dim + j * inner_num_ + k]);//做模型归一，否则指数运算非常大
       }
     }
     // subtraction
     caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, channels, inner_num_,
-        1, -1., sum_multiplier_.cpu_data(), scale_data, 1., top_data);
+        1, -1., sum_multiplier_.cpu_data(), scale_data, 1., top_data);//减去一遍最大值
     // exponentiation
     caffe_exp<Dtype>(dim, top_data, top_data);
     // sum after exp
@@ -57,7 +57,7 @@ void SoftmaxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       top_data += inner_num_;
     }
   }
-}
+}//求总和，求分类概率
 
 template <typename Dtype>
 void SoftmaxLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
