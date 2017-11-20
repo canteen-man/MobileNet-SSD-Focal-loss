@@ -71,7 +71,7 @@ void ConvolutionDepthwiseLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bo
   {
     dilation_h_ = 1;
     dilation_w_ = 1;
-  }
+  }//读参数和初始化
   vector<int> weight_shape(4);
   weight_shape[0] = bottom[0]->channels();
   weight_shape[1] = 1;
@@ -107,7 +107,7 @@ void ConvolutionDepthwiseLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& botto
   top_shape.push_back(bottom[0]->num());
   top_shape.push_back(bottom[0]->channels());
   top_shape.push_back((bottom[0]->height() + 2 * pad_h_ - (dilation_h_ * (kernel_h_ - 1) + 1)) / stride_h_ + 1);
-  top_shape.push_back((bottom[0]->width() + 2 * pad_w_ - (dilation_w_ * (kernel_w_ - 1) + 1)) / stride_w_ + 1);
+  top_shape.push_back((bottom[0]->width() + 2 * pad_w_ - (dilation_w_ * (kernel_w_ - 1) + 1)) / stride_w_ + 1);//预先算出输出特征图尺寸
   top[0]->Reshape(top_shape);
   vector<int> weight_buffer_shape;
   weight_buffer_shape.push_back(bottom[0]->channels());
@@ -161,20 +161,20 @@ void ConvolutionDepthwiseLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& b
       {
         for (int w = 0; w < top_width; ++w)
         {
-          const Dtype* weight_data = weight_data_base + c * kernel_h_ * kernel_w_;
+          const Dtype* weight_data = weight_data_base + c * kernel_h_ * kernel_w_;//移动指针，对应做卷积 目前权重指针加对应数量特征图
           Dtype value = 0;
           for (int kh = 0; kh < kernel_h_; ++kh)
           {
             for (int kw = 0; kw < kernel_w_; ++kw)
             {
               int h_in = -pad_h_ + h * stride_h_ + kh * dilation_h_;
-              int w_in = -pad_w_ + w * stride_w_ + kw * dilation_w_;
+              int w_in = -pad_w_ + w * stride_w_ + kw * dilation_w_;//根据补0设定后的变化
               if ((h_in >= 0) && (h_in < bottom_height) && (w_in >= 0) && (w_in < bottom_width))
               {
-                int offset = ((n * channels + c) * bottom_height + h_in) * bottom_width + w_in;
-                value += (*weight_data) * bottom_data[offset];
+                int offset = ((n * channels + c) * bottom_height + h_in) * bottom_width + w_in;//拿出特征图每个点对应的位置
+                value += (*weight_data) * bottom_data[offset];//对应点相乘
               }
-              ++weight_data;
+              ++weight_data;//权重指针加1
             }
           }
           *top_data++ = value;
