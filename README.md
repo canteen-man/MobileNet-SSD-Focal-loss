@@ -4,8 +4,18 @@ MobileNet+SSD+Focal loss by caffe
 
 This is the MobileNet ,SSD and Focal loss.
 
+##################################################################################################
+I have run this deploy on the pi3,ARM A53 1G RAM.
+
+the 600*600 image use time about 4s
+
+this is the compile command on my pi3:
+
+g++ -o mobilenetssd main.cpp ``pkg-config --cflags --libs opencv``  -D CPU_ONLY -I /home/pi/MobileNet-SSD-Focal-loss/include  -D CPU_ONLY -I/home/pi/MobileNet-SSD-Focal-loss/build/src -D CPU_ONLY  -L /home/pi/MobileNet-SSD-Focal-loss/build/lib -D CPU_ONLY -lcaffe -lglog  -lboost_system -lcblas 
+##################################################################################################
 
 I refer to many programs from other people.
+
 
 The proto,src and include files have already changed.
 
@@ -32,10 +42,4 @@ Of course, you need to change some files，such as Makefile.config。
 
 
 
-I have run this deploy on the pi3,ARM A53 1G RAM.
 
-the 600*600 image use time about 4s
-
-this is the compile command on my pi3:
-
-g++ -o mobilenetssd main.cpp ``pkg-config --cflags --libs opencv``  -D CPU_ONLY -I /home/pi/MobileNet-SSD-Focal-loss/include  -D CPU_ONLY -I/home/pi/MobileNet-SSD-Focal-loss/build/src -D CPU_ONLY  -L /home/pi/MobileNet-SSD-Focal-loss/build/lib -D CPU_ONLY -lcaffe -lglog  -lboost_system -lcblas 
